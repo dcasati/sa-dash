@@ -4,7 +4,6 @@ LOCATIONS = {
     "calgary": {
         "name": "Calgary",
         "scrapers": [
-            "time_wheel_calgary",
             "info_calgary",
             "weather_calgary",
             "calgary_air_quality",
