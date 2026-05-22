@@ -342,6 +342,9 @@ def render_html(location_name: str, providers: list[dict], generated_at: str) ->
   <header>
     <h1>{location_name} Dashboard</h1>
     <p class="meta">{generated} (Next update: {next_update})</p>
+    <p class="info">
+      📡 Get this page via Winlink/HF: send email to <code>query@saildocs.com</code> with <code>send https://dcasati.github.io/sa-dash/</code> in the body.
+    </p>
   </header>
   <div class="modules">{toc_section}{"".join(sections)}</div>
   <footer class="footer">
