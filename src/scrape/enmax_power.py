@@ -1,78 +1,105 @@
-"""ENMAX power outage scraper for Calgary."""
-import os
+"""ENMAX power outage scraper for Calgary via poweroutage.com."""
 import requests
+from bs4 import BeautifulSoup
 from src.scrape.base import BaseScraper
 
 
-_OUTAGE_API_BASE = "https://epc-outagedatacache.azurewebsites.net/api/cache"
+_POWER_URL = "https://poweroutage.com/ca/utility/1507"
 
 
 class EnmaxPowerScraper(BaseScraper):
     ID = "enmax_power"
     LABEL = "⚡ ENMAX Power"
-    SOURCE_URLS = ["https://outages.enmax.com"]
+    SOURCE_URLS = [_POWER_URL]
 
     def fetch(self) -> dict:
-        code = os.environ.get("ENMAX_OUTAGE_CODE", "")
-        if not code:
-            html = (
-                '<p>Power outage data unavailable (no API key). '
-                '<a href="https://outages.enmax.com">View ENMAX Outage Portal →</a></p>'
-            )
-            return self.result(html=html, text="See outages.enmax.com")
-
         try:
-            resp = requests.get(f"{_OUTAGE_API_BASE}?code={code}", timeout=15)
+            resp = requests.get(_POWER_URL, timeout=15, headers={"User-Agent": "Mozilla/5.0"})
             resp.raise_for_status()
-            data = resp.json()
+            soup = BeautifulSoup(resp.text, "html.parser")
 
-            if not data or (isinstance(data, list) and len(data) == 0):
-                html = '<p>✅ No current power outages reported. <a href="https://outages.enmax.com">Outage map</a></p>'
-                text = "No power outages reported."
-                return self.result(html=html, text=text)
+            # Extract summary stats from the top area
+            total_tracked = ""
+            total_out = ""
+            last_updated = ""
 
-            # data is a list of outage objects
-            outages = data if isinstance(data, list) else data.get("outages", [])
-            total = len(outages)
-            total_affected = sum(int(o.get("customersAffected", 0) or 0) for o in outages)
+            # Look for key stats in text
+            text_content = soup.get_text()
+            for line in text_content.split("\n"):
+                line = line.strip()
+                if "Utility Outages" in line or "Customers Out" in line:
+                    pass  # header labels
 
-            items = []
-            for o in outages[:8]:
-                area = o.get("area", o.get("municipality", "Unknown area"))
-                customers = o.get("customersAffected", "?")
-                cause = o.get("cause", "Unknown")
-                status = o.get("status", "")
-                etr = o.get("estimatedRestoreTime", o.get("etr", ""))
-                line = f"<li><strong>{area}</strong> — {customers} affected"
-                if cause and cause != "Unknown":
-                    line += f" | Cause: {cause}"
-                if etr:
-                    line += f" | ETR: {etr}"
-                if status:
-                    line += f" | {status}"
-                line += "</li>"
-                items.append(line)
+            # Parse the county table
+            rows = []
+            table_links = soup.find_all("a", href=True)
+            counties = []
+            for link in table_links:
+                if "/ca/county/" in link.get("href", ""):
+                    counties.append(link.get_text(strip=True))
 
-            summary = f"<p><strong>{total} outage{'s' if total != 1 else ''}</strong> — {total_affected:,} customers affected</p>"
-            html = summary + f"<ul>{''.join(items)}</ul>"
-            if total > 8:
-                html += f'<p><a href="https://outages.enmax.com">View all {total} outages →</a></p>'
-            text = f"{total} outages, {total_affected} customers affected"
+            # Try to get structured data from the page
+            # The page has: Customers Tracked, Utility Outages, table with county/tracked/out
+            numbers = []
+            for el in soup.find_all(string=True):
+                t = el.strip()
+                if t and t.replace(",", "").isdigit():
+                    numbers.append(t)
+
+            # Parse: first number = customers tracked, second = utility outages
+            customers_tracked = numbers[0] if len(numbers) > 0 else "?"
+            utility_outages = numbers[1] if len(numbers) > 1 else "?"
+
+            # Build county table from remaining numbers (pairs: tracked, out)
+            county_data = []
+            idx = 2  # skip first two summary numbers
+            for county in counties:
+                tracked = numbers[idx] if idx < len(numbers) else "?"
+                out = numbers[idx + 1] if idx + 1 < len(numbers) else "?"
+                county_data.append((county, tracked, out))
+                idx += 2
+
+            # Determine if there are outages
+            try:
+                outage_count = int(str(utility_outages).replace(",", ""))
+            except (ValueError, TypeError):
+                outage_count = 0
+
+            if outage_count == 0:
+                html = (
+                    f'<p>✅ <strong>No current outages</strong> — '
+                    f'{customers_tracked} customers tracked</p>'
+                )
+                if county_data:
+                    html += '<table class="info-table"><tr><th>Area</th><th>Tracked</th><th>Out</th></tr>'
+                    for county, tracked, out in county_data:
+                        html += f'<tr><td>{county}</td><td>{tracked}</td><td>{out}</td></tr>'
+                    html += '</table>'
+                html += f'<p><small>Source: <a href="{_POWER_URL}">poweroutage.com</a></small></p>'
+                text = f"No outages — {customers_tracked} customers tracked"
+            else:
+                html = (
+                    f'<p>⚠️ <strong>{utility_outages} outage{"s" if outage_count != 1 else ""}</strong> — '
+                    f'{customers_tracked} customers tracked</p>'
+                )
+                if county_data:
+                    html += '<table class="info-table"><tr><th>Area</th><th>Tracked</th><th>Out</th></tr>'
+                    for county, tracked, out in county_data:
+                        style = ' style="color:#e74c3c;font-weight:bold"' if out != "0" else ""
+                        html += f'<tr><td>{county}</td><td>{tracked}</td><td{style}>{out}</td></tr>'
+                    html += '</table>'
+                html += f'<p><small>Source: <a href="{_POWER_URL}">poweroutage.com</a></small></p>'
+                text = f"{utility_outages} outages across ENMAX service area"
+
             return self.result(html=html, text=text)
 
         except Exception as e:
             import sys
-            print(f"[enmax_power] API error: {e}", file=sys.stderr)
-            # API is IP-restricted; show helpful fallback with direct link
+            print(f"[enmax_power] Error: {e}", file=sys.stderr)
             html = (
-                '<p>⚡ Check ENMAX for current outages in your area:</p>'
-                '<ul>'
-                '<li><a href="https://outages.enmax.com">🗺️ ENMAX Outage Map</a> — live map & list view</li>'
-                '<li><a href="tel:+14035142100">📞 403-514-2100</a> — report or check outages</li>'
-                '</ul>'
+                f'<p>⚡ <a href="{_POWER_URL}">Check ENMAX outages on poweroutage.com →</a></p>'
             )
-            text = "Check outages.enmax.com or call 403-514-2100"
-            return self.result(html=html, text=text)
+            return self.result(html=html, text="See poweroutage.com for ENMAX status")
 
 
 def scrape():
