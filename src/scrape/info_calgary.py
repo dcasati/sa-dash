@@ -36,6 +36,9 @@ class InfoCalgaryScraper(BaseScraper):
 <tr><td>River Conditions</td><td></td><td><a href="https://rivers.alberta.ca">rivers.alberta.ca</a></td></tr>
 </table>
 
+<details>
+<summary><strong>📻 Radio Information</strong> (Broadcast, Amateur, Winlink)</summary>
+
 <h3>Broadcast Radio</h3>
 <table class="info-table">
 <tr><th>Station</th><th>Freq</th><th>Band</th><th>Format</th></tr>
@@ -69,6 +72,7 @@ class InfoCalgaryScraper(BaseScraper):
 <tr><td>VE6WMA-10</td><td>145.030</td><td>Packet</td><td>DO21</td></tr>
 <tr><td>VE6HRR-5</td><td>7083.5</td><td>VARA HF</td><td>DO20</td></tr>
 </table>
+</details>
 </div>"""
         text = "Calgary, AB — 51.0447°N 114.0719°W — Emergency: 911, Non-emerg Police: 403-266-1234, CEMA: 403-268-8200"
         return self.result(html=html, text=text)
