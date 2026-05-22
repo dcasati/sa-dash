@@ -5,6 +5,7 @@ from src.scrape.info_calgary import scrape as info_calgary_scrape
 from src.scrape.weather_calgary import scrape as weather_calgary_scrape
 from src.scrape.calgary_air_quality import scrape as calgary_air_quality_scrape
 from src.scrape.calgary_river_levels import scrape as calgary_river_levels_scrape
+from src.scrape.propagation_calgary import scrape as propagation_calgary_scrape
 from src.scrape.calgary_transit import scrape as calgary_transit_scrape
 from src.scrape.calgary_traffic import scrape as calgary_traffic_scrape
 from src.scrape.enmax_power import scrape as enmax_power_scrape
@@ -20,6 +21,7 @@ _REGISTRY: dict[str, callable] = {
     "weather_calgary": weather_calgary_scrape,
     "calgary_air_quality": calgary_air_quality_scrape,
     "calgary_river_levels": calgary_river_levels_scrape,
+    "propagation_calgary": propagation_calgary_scrape,
     "calgary_transit": calgary_transit_scrape,
     "calgary_traffic": calgary_traffic_scrape,
     "enmax_power": enmax_power_scrape,

@@ -9,6 +9,7 @@ LOCATIONS = {
             "weather_calgary",
             "calgary_air_quality",
             "calgary_river_levels",
+            "propagation_calgary",
             "calgary_transit",
             "calgary_traffic",
             "enmax_power",
