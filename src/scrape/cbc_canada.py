@@ -12,7 +12,8 @@ class CBCCanadaScraper(BaseScraper):
     def fetch(self) -> dict:
         url = "https://www.cbc.ca/webfeed/rss/rss-canada"
         try:
-            resp = requests.get(url, timeout=20, allow_redirects=True)
+            resp = requests.get(url, timeout=20, allow_redirects=True,
+                               headers={"User-Agent": "Mozilla/5.0 (compatible; sa-dash/1.0)"})
             resp.raise_for_status()
             items = parse_rss(resp.text, limit=6)
             if items:
@@ -21,7 +22,9 @@ class CBCCanadaScraper(BaseScraper):
             else:
                 html = '<p>No recent national news.</p>'
                 text = "No recent national news."
-        except Exception:
+        except Exception as e:
+            import sys
+            print(f"[cbc_canada] Error: {e}", file=sys.stderr)
             html = '<p>National news feed temporarily unavailable.</p>'
             text = "National news unavailable."
         return self.result(html=html, text=text)

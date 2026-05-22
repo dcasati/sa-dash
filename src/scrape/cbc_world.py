@@ -12,7 +12,8 @@ class CBCWorldScraper(BaseScraper):
     def fetch(self) -> dict:
         url = "https://www.cbc.ca/webfeed/rss/rss-world"
         try:
-            resp = requests.get(url, timeout=20, allow_redirects=True)
+            resp = requests.get(url, timeout=20, allow_redirects=True,
+                               headers={"User-Agent": "Mozilla/5.0 (compatible; sa-dash/1.0)"})
             resp.raise_for_status()
             items = parse_rss(resp.text, limit=6)
             if items:
@@ -21,7 +22,9 @@ class CBCWorldScraper(BaseScraper):
             else:
                 html = '<p>No recent world news.</p>'
                 text = "No recent world news."
-        except Exception:
+        except Exception as e:
+            import sys
+            print(f"[cbc_world] Error: {e}", file=sys.stderr)
             html = '<p>World news feed temporarily unavailable.</p>'
             text = "World news unavailable."
         return self.result(html=html, text=text)
