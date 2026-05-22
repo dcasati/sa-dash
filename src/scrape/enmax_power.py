@@ -60,10 +60,12 @@ class EnmaxPowerScraper(BaseScraper):
             text = f"{total} outages, {total_affected} customers affected"
             return self.result(html=html, text=text)
 
-        except Exception:
+        except Exception as e:
+            import sys
+            print(f"[enmax_power] API error: {e}", file=sys.stderr)
             # Fallback: link to the outage portal
             html = (
-                '<p>Power outage data unavailable. '
+                f'<p>⚠️ Power outage data unavailable ({type(e).__name__}). '
                 '<a href="https://outages.enmax.com">View ENMAX Outage Portal →</a></p>'
             )
             text = "Power outage data unavailable — see outages.enmax.com"
