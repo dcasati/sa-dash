@@ -12,35 +12,68 @@ class WeatherCalgaryScraper(BaseScraper):
     ]
 
     def fetch(self) -> dict:
-        # Current conditions from wttr.in (metric)
+        # Current conditions + forecast from wttr.in JSON API (metric)
         weather_html = ""
         weather_text = ""
         try:
             resp = requests.get(
-                "https://wttr.in/Calgary?format=%c+%t+|+Feels+like:+%f+|+Wind:+%w+|+Humidity:+%h+|+UV:+%u&m",
+                "https://wttr.in/Calgary?format=j1&m",
                 headers={"User-Agent": "curl/8.0"},
                 timeout=15,
             )
             resp.raise_for_status()
-            current = resp.text.strip()
-            weather_html = f'<p><strong>Now:</strong> {current}</p>'
-            weather_text = current
-        except Exception:
+            data = resp.json()
+
+            # Current conditions
+            cc = data["current_condition"][0]
+            temp = cc["temp_C"]
+            feels = cc["FeelsLikeC"]
+            wind_speed = cc["windspeedKmph"]
+            wind_dir = cc["winddir16Point"]
+            humidity = cc["humidity"]
+            uv = cc["uvIndex"]
+            desc = cc["weatherDesc"][0]["value"]
+            visibility = cc.get("visibility", "")
+
+            weather_html = (
+                f'<p><strong>Now:</strong> {desc} | <strong>{temp}°C</strong> '
+                f'(feels {feels}°C) | Wind: {wind_speed} km/h {wind_dir} | '
+                f'Humidity: {humidity}% | UV: {uv}</p>'
+            )
+            weather_text = f"{desc}, {temp}°C (feels {feels}°C), wind {wind_speed} km/h {wind_dir}"
+
+            # 3-day forecast
+            forecast_rows = []
+            for day in data.get("weather", [])[:3]:
+                date = day["date"]
+                high = day["maxtempC"]
+                low = day["mintempC"]
+                # Get noon-ish description (index 4 = 12:00)
+                hourly = day.get("hourly", [])
+                noon = hourly[4] if len(hourly) > 4 else hourly[0] if hourly else None
+                day_desc = noon["weatherDesc"][0]["value"] if noon else ""
+                rain_mm = noon.get("precipMM", "0") if noon else "0"
+                wind = noon.get("windspeedKmph", "") if noon else ""
+
+                forecast_rows.append(
+                    f'<tr><td>{date}</td><td>{day_desc}</td>'
+                    f'<td><strong>{high}°C</strong> / {low}°C</td>'
+                    f'<td>{wind} km/h</td><td>{rain_mm} mm</td></tr>'
+                )
+
+            if forecast_rows:
+                weather_html += (
+                    '<table class="info-table">'
+                    '<tr><th>Date</th><th>Conditions</th><th>High/Low</th><th>Wind</th><th>Precip</th></tr>'
+                    + "".join(forecast_rows) +
+                    '</table>'
+                )
+
+        except Exception as e:
+            import sys
+            print(f"[weather_calgary] Error: {e}", file=sys.stderr)
             weather_html = "<p>Current weather temporarily unavailable.</p>"
             weather_text = "Weather unavailable."
-
-        # 3-day forecast from wttr.in (metric, narrow)
-        forecast_html = ""
-        try:
-            resp4 = requests.get(
-                "https://wttr.in/Calgary?2&m&n&Q",
-                headers={"User-Agent": "curl/8.0"},
-                timeout=15,
-            )
-            if resp4.status_code == 200:
-                forecast_html = f'<pre style="font-size:0.8em;overflow-x:auto;line-height:1.2">{resp4.text}</pre>'
-        except Exception:
-            pass
 
         # Weather alerts from Environment Canada
         alerts_html = ""
@@ -70,7 +103,7 @@ class WeatherCalgaryScraper(BaseScraper):
         except Exception:
             alerts_html = ""
 
-        html = weather_html + forecast_html + alerts_html
+        html = weather_html + alerts_html
         return self.result(html=html, text=weather_text)
 
 
