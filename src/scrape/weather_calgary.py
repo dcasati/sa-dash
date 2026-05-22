@@ -12,29 +12,35 @@ class WeatherCalgaryScraper(BaseScraper):
     ]
 
     def fetch(self) -> dict:
-        # Current conditions from wttr.in
+        # Current conditions from wttr.in (metric)
         weather_html = ""
         weather_text = ""
         try:
             resp = requests.get(
-                "https://wttr.in/Calgary?format=%c+%t+|+Feels+like:+%f+|+Wind:+%w+|+Humidity:+%h+|+UV:+%u",
+                "https://wttr.in/Calgary?format=%c+%t+|+Feels+like:+%f+|+Wind:+%w+|+Humidity:+%h+|+UV:+%u&m",
                 headers={"User-Agent": "curl/8.0"},
                 timeout=15,
             )
             resp.raise_for_status()
             current = resp.text.strip()
-
-            # Also get a brief forecast
-            resp2 = requests.get(
-                "https://wttr.in/Calgary?format=%c+%t+%w",
-                headers={"User-Agent": "curl/8.0"},
-                timeout=15,
-            )
             weather_html = f'<p><strong>Now:</strong> {current}</p>'
             weather_text = current
         except Exception:
             weather_html = "<p>Current weather temporarily unavailable.</p>"
             weather_text = "Weather unavailable."
+
+        # 3-day forecast from wttr.in (metric, narrow)
+        forecast_html = ""
+        try:
+            resp4 = requests.get(
+                "https://wttr.in/Calgary?2&m&n&Q",
+                headers={"User-Agent": "curl/8.0"},
+                timeout=15,
+            )
+            if resp4.status_code == 200:
+                forecast_html = f'<pre style="font-size:0.8em;overflow-x:auto;line-height:1.2">{resp4.text}</pre>'
+        except Exception:
+            pass
 
         # Weather alerts from Environment Canada
         alerts_html = ""
@@ -64,7 +70,7 @@ class WeatherCalgaryScraper(BaseScraper):
         except Exception:
             alerts_html = ""
 
-        html = weather_html + alerts_html
+        html = weather_html + forecast_html + alerts_html
         return self.result(html=html, text=weather_text)
 
 
