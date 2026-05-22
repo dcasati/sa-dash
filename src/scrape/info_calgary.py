@@ -59,6 +59,7 @@ class InfoCalgaryScraper(BaseScraper):
 <tr><td>VE6OC</td><td>146.760</td><td>−</td><td>100.0</td><td>Calgary Centre</td></tr>
 <tr><td>VE6CRC</td><td>146.820</td><td>−</td><td>100.0</td><td>Cochrane</td></tr>
 <tr><td>VE6KAM</td><td>145.470</td><td>−</td><td>100.0</td><td>ARES Calgary</td></tr>
+<tr><td>VE6OIL</td><td>146.670</td><td>−</td><td>100.0</td><td>Calgary ACS (Voice)</td></tr>
 <tr><td>VE6REP</td><td>443.100</td><td>+</td><td>100.0</td><td>UHF Calgary</td></tr>
 <tr><td>VE6YYC</td><td>444.225</td><td>+</td><td>100.0</td><td>DMR Calgary</td></tr>
 </table>
