@@ -1,20 +1,21 @@
 import datetime as dt
 import html
 import email.utils
+import zoneinfo
 
 import feedparser
 
 from src.scrape.base import clean_text, fetch_html
 
 
-HST = dt.timezone(dt.timedelta(hours=-10))
+MDT = zoneinfo.ZoneInfo("America/Edmonton")
 
 
 def _format_published(entry) -> str:
     parsed = getattr(entry, "published_parsed", None) or getattr(entry, "updated_parsed", None)
     if parsed:
-        dt_obj = dt.datetime(*parsed[:6], tzinfo=dt.timezone.utc).astimezone(HST)
-        return dt_obj.strftime("%Y-%m-%d %H:%M HST")
+        dt_obj = dt.datetime(*parsed[:6], tzinfo=dt.timezone.utc).astimezone(MDT)
+        return dt_obj.strftime("%Y-%m-%d %H:%M %Z")
     raw = clean_text(getattr(entry, "published", "") or getattr(entry, "updated", ""))
     if not raw:
         return ""
@@ -22,7 +23,7 @@ def _format_published(entry) -> str:
         dt_obj = email.utils.parsedate_to_datetime(raw)
         if dt_obj.tzinfo is None:
             dt_obj = dt_obj.replace(tzinfo=dt.timezone.utc)
-        return dt_obj.astimezone(HST).strftime("%Y-%m-%d %H:%M HST")
+        return dt_obj.astimezone(MDT).strftime("%Y-%m-%d %H:%M %Z")
     except (TypeError, ValueError):
         return raw
 
@@ -74,4 +75,16 @@ def render_rss_html(items: list[dict]) -> str:
         )
     return "".join(blocks)
 
+
+def parse_rss_entries(xml_text: str, limit: int = 5) -> list[dict]:
+    """Parse RSS XML and return entries with 'title' and 'link' keys."""
+    feed = feedparser.parse(xml_text)
+    items = []
+    for entry in feed.entries:
+        title = clean_text(getattr(entry, "title", "")) or "Untitled"
+        link = getattr(entry, "link", "") or ""
+        items.append({"title": title, "link": link})
+        if len(items) >= limit:
+            break
+    return items
 

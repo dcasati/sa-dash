@@ -17,8 +17,6 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
-    env:
-      MARINETRAFFIC_DEBUG: "1"
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -29,7 +27,7 @@ jobs:
       - name: Install dependencies
         run: pip install -r requirements.txt
       - name: Generate pages
-        run: python3 -m src.generate --island kauai
+        run: python3 -m src.generate --location calgary
         env:
           USGS_API_KEY: ${{ secrets.USGS_API_KEY }}
           HCDP_API_KEY: ${{ secrets.HCDP_API_KEY }}

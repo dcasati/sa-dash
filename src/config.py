@@ -1,26 +1,18 @@
-"""Source configuration for islands and providers."""
+"""Source configuration for locations and providers."""
 
-ISLANDS = {
-    "kauai": {
-        "name": "Kauai",
+LOCATIONS = {
+    "calgary": {
+        "name": "Calgary",
         "scrapers": [
-            "time_wheel",
-            "info_kauai",
-            "weather_kauai",
-            "precipitation",
-            "kiuc",
-            "kauai_water",
-            "verizon_mobile",
-            "att_mobile",
-            "propagation",
-            "kauai_solid_waste",
-            "hidot_highways_news",
-            "usgs_water_levels",
-            "ocean_water_quality",
-            "adsbexchange_live",
-            "marinetraffic_kauai",
-            "kauai_county_press",
-            "kauai_now",
+            "time_wheel_calgary",
+            "info_calgary",
+            "weather_calgary",
+            "calgary_air_quality",
+            "calgary_river_levels",
+            "calgary_transit",
+            "calgary_traffic",
+            "enmax_power",
+            "calgary_news",
             "global_events_wire",
         ],
     }

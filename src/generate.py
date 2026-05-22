@@ -3,7 +3,7 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
-from src.config import ISLANDS
+from src.config import LOCATIONS
 from src.render.html import render_html
 from src.scrape.base import now_iso
 from src.scrape.cache import load_cache, save_cache
@@ -52,31 +52,31 @@ def scrape_with_cache(scraper_name: str, cache_dir: Path, offline: bool) -> dict
         }
 
 
-def generate_island(
-    island_key: str,
+def generate_location(
+    location_key: str,
     output_dir: Path,
     cache_dir: Path,
     offline: bool,
 ) -> None:
-    if island_key not in ISLANDS:
-        raise SystemExit(f"Unknown island: {island_key}")
-    island = ISLANDS[island_key]
-    scrapers = island.get("scrapers", [])
+    if location_key not in LOCATIONS:
+        raise SystemExit(f"Unknown location: {location_key}")
+    location = LOCATIONS[location_key]
+    scrapers = location.get("scrapers", [])
     results = [scrape_with_cache(name, cache_dir, offline) for name in scrapers]
     generated_at = now_iso()
 
     output_dir.mkdir(parents=True, exist_ok=True)
-    html = render_html(island["name"], results, generated_at)
+    html = render_html(location["name"], results, generated_at)
     (output_dir / "index.html").write_text(html, encoding="utf-8")
 
 
 def main() -> None:
     load_dotenv(_REPO_ROOT / ".env")
-    parser = argparse.ArgumentParser(description="Generate emergency dashboard pages.")
-    parser.add_argument("--island", default="kauai", help="Island key to generate")
+    parser = argparse.ArgumentParser(description="Generate situational awareness dashboard pages.")
+    parser.add_argument("--location", "--island", default="calgary", help="Location key to generate")
     parser.add_argument(
         "--scraper",
-        help="Run a single scraper by name (overrides island config)",
+        help="Run a single scraper by name (overrides location config)",
     )
     parser.add_argument("--offline", action="store_true", help="Render from cache only")
     parser.add_argument(
@@ -96,7 +96,7 @@ def main() -> None:
         output_dir.mkdir(parents=True, exist_ok=True)
         (output_dir / f"{args.scraper}.html").write_text(html, encoding="utf-8")
     else:
-        generate_island(args.island, output_dir, cache_dir, args.offline)
+        generate_location(args.location, output_dir, cache_dir, args.offline)
 
 
 if __name__ == "__main__":

@@ -1,10 +1,11 @@
 import datetime as dt
 import re
+import zoneinfo
 from pathlib import Path
 
 from bs4 import BeautifulSoup
 
-HST = dt.timezone(dt.timedelta(hours=-10))
+MDT = zoneinfo.ZoneInfo("America/Edmonton")
 
 
 def _format_ts(ts: str | None) -> str:
@@ -13,8 +14,8 @@ def _format_ts(ts: str | None) -> str:
     try:
         parsed = dt.datetime.fromisoformat(ts)
         if parsed.tzinfo is None:
-            parsed = parsed.replace(tzinfo=HST)
-        return parsed.astimezone(HST).strftime("%Y-%m-%d %H:%M HST")
+            parsed = parsed.replace(tzinfo=MDT)
+        return parsed.astimezone(MDT).strftime("%Y-%m-%d %H:%M %Z")
     except ValueError:
         return ts
 
@@ -76,7 +77,7 @@ def _next_update_ts(
     except ValueError:
         return "unknown"
     if parsed.tzinfo is None:
-        parsed = parsed.replace(tzinfo=HST)
+        parsed = parsed.replace(tzinfo=MDT)
     now_utc = parsed.astimezone(dt.timezone.utc)
     minute, hours = schedule
     base_date = now_utc.date()
@@ -92,7 +93,7 @@ def _next_update_ts(
                 tzinfo=dt.timezone.utc,
             )
             if candidate > now_utc:
-                return candidate.astimezone(HST).strftime("%H:%M HST")
+                return candidate.astimezone(MDT).strftime("%H:%M %Z")
     next_day = base_date + dt.timedelta(days=1)
     fallback = dt.datetime(
         next_day.year,
@@ -102,7 +103,7 @@ def _next_update_ts(
         minute,
         tzinfo=dt.timezone.utc,
     )
-    return fallback.astimezone(HST).strftime("%H:%M HST")
+    return fallback.astimezone(MDT).strftime("%H:%M %Z")
 
 
 def _label_to_id(label: str) -> str:
@@ -144,7 +145,7 @@ def _ensure_compact_tables(fragment: str) -> str:
     return body.decode_contents()
 
 
-def render_html(island_name: str, providers: list[dict], generated_at: str) -> str:
+def render_html(location_name: str, providers: list[dict], generated_at: str) -> str:
     sections = []
     toc_items = []
     for provider in providers:
@@ -184,7 +185,7 @@ def render_html(island_name: str, providers: list[dict], generated_at: str) -> s
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>{island_name} Dashboard</title>
+  <title>{location_name} Dashboard</title>
   <style>
     :root {{
       color-scheme: light only;
@@ -339,11 +340,8 @@ def render_html(island_name: str, providers: list[dict], generated_at: str) -> s
 </head>
 <body>
   <header>
-    <h1>{island_name} Dashboard</h1>
-    <p class="meta">{generated} (Next update: {next_update}) | <a href="https://github.com/islandmagic/sa-dash/issues">Report issue</a></p>
-    <p class="info">
-      Get this page via email by sending a message to <code>query@saildocs.com</code> with <code>send http://kauai.islandmagic.co</code> in the body.
-    </p>
+    <h1>{location_name} Dashboard</h1>
+    <p class="meta">{generated} (Next update: {next_update})</p>
   </header>
   <div class="modules">{toc_section}{"".join(sections)}</div>
   <footer class="footer">

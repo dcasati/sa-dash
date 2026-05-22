@@ -1,11 +1,14 @@
 import datetime as dt
 import re
+import zoneinfo
 from typing import Iterable, Optional
 from urllib.parse import urljoin
 
 import httpx
 from bs4 import BeautifulSoup
 
+
+MST = zoneinfo.ZoneInfo("America/Edmonton")
 
 DEFAULT_HEADERS = {
     "User-Agent": "eoc-dash/1.0 (+https://github.com/)",
@@ -14,8 +17,7 @@ DEFAULT_HEADERS = {
 
 
 def now_iso() -> str:
-    hst = dt.timezone(dt.timedelta(hours=-10))
-    return dt.datetime.now(tz=hst).replace(microsecond=0).isoformat()
+    return dt.datetime.now(tz=MST).replace(microsecond=0).isoformat()
 
 
 def fetch_html(url: str, timeout: float = 10.0, headers: dict | None = None) -> str:
@@ -71,6 +73,31 @@ def extract_headlines(html: str, base_url: str, limit: int = 8) -> list[dict]:
         if len(results) >= limit:
             break
     return results
+
+
+class BaseScraper:
+    """Base class for Calgary scrapers."""
+    ID = "base"
+    LABEL = "Base"
+    SOURCE_URLS: list = []
+
+    def __call__(self) -> dict:
+        return self.fetch()
+
+    def fetch(self) -> dict:
+        raise NotImplementedError
+
+    def result(self, html: str, text: str, error: str | None = None, stale: bool = False) -> dict:
+        return {
+            "id": self.ID,
+            "label": self.LABEL,
+            "retrieved_at": now_iso(),
+            "source_urls": self.SOURCE_URLS,
+            "html": html,
+            "text": text,
+            "error": error,
+            "stale": stale,
+        }
 
 
 def scrape_status_provider(provider: dict) -> dict:

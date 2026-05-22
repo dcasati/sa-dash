@@ -13,7 +13,8 @@ RSS_URL = "https://publish.obsidian.md/s2underground/rss.xml"
 WIRE_LISTING_URL = (
     "https://publish.obsidian.md/s2underground/"
 )
-HST = dt.timezone(dt.timedelta(hours=-10))
+import zoneinfo
+MDT = zoneinfo.ZoneInfo("America/Edmonton")
 MAX_ITEMS = 5
 
 
@@ -38,8 +39,8 @@ def _parse_wire_datetime(header_line: str) -> str:
             parsed_utc = dt.datetime.strptime(ts_text, fmt).replace(
                 tzinfo=dt.timezone.utc
             )
-            parsed_hst = parsed_utc.astimezone(HST)
-            return parsed_hst.strftime("%Y-%m-%d %H:%M HST")
+            parsed_mdt = parsed_utc.astimezone(MDT)
+            return parsed_mdt.strftime("%Y-%m-%d %H:%M %Z")
         except ValueError:
             continue
     return ts_text

@@ -1,6 +1,6 @@
-# Island Dashboard
+# Calgary Situational Awareness Dashboard
 
-Lightweight dashboard generator to provide situational awerness information about Kauai.
+Lightweight dashboard generator providing situational awareness information for Calgary, Alberta.
 
 ## Quick start
 
@@ -9,11 +9,11 @@ Lightweight dashboard generator to provide situational awerness information abou
    - `source .venv/bin/activate`
    - `pip install -r requirements.txt`
 
-2. Generate Kauai pages:
-   - `python3 -m src.generate --island kauai`
+2. Generate Calgary dashboard:
+   - `python3 -m src.generate --location calgary`
 
 3. Run a single scraper (for testing):
-   - `python3 -m src.generate --scraper kiuc`
+   - `python3 -m src.generate --scraper weather_calgary`
 
 Outputs are written to `site/`:
 - `site/index.html`
@@ -21,27 +21,19 @@ Outputs are written to `site/`:
 ## Offline mode
 
 If the network is unavailable, you can render from cached data:
-- `python3 -m src.generate --island kauai --offline`
+- `python3 -m src.generate --location calgary --offline`
 
-## Local propagation cron
+## Data Sources
 
-If PSKReporter is blocked in CI, you can generate `data/propagation.json` locally
-on a machine with access and push it to the repo.
-
-1. Make the script executable:
-   - `chmod +x scripts/propagation_cron.sh`
-2. Add a cron entry (runs at minute 25 each hour):
-   - `25 * * * * cd /Users/xxx/sa-dash && REPO_DIR=/Users/xxx/sa-dash VENV_PATH=/Users/xxx/sa-dash/.venv ./scripts/propagation_cron.sh >> /Users/xxx/sa-dash/propagation_cron.log 2>&1`
-
-This requires git credentials configured on that machine so `git push` succeeds.
+- Environment Canada (weather)
+- City of Calgary Open Data (transit, traffic, river levels, air quality)
+- CBC Calgary RSS (news)
+- ENMAX (power outages)
+- S2 Underground Wire (global events)
 
 ## Secrets
 
-Put keys in a **`.env`** file at the repo root (see `.env.example`). When you run `python3 -m src.generate ...`, that file is loaded automatically via `python-dotenv` (`USGS_API_KEY`, `HCDP_API_KEY`, etc.). Variables you already exported in the shell still override `.env`.
-
-- GitHub Actions: add repository secrets (e.g. `USGS_API_KEY`, `HCDP_API_KEY`) and map them in `.github/workflows/generate.yml`.
-
-**Cron / other scripts** that call `python3` directly should either `cd` to the repo root (so the same `.env` path applies if you add `load_dotenv` there) or `export`/`source` the keys before running. The generate entrypoint loads only when using `src.generate`.
+Put keys in a **`.env`** file at the repo root (see `.env.example`). When you run `python3 -m src.generate ...`, that file is loaded automatically via `python-dotenv`.
 
 ## Notes
 
