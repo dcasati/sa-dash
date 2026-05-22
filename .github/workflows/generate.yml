@@ -31,6 +31,7 @@ jobs:
         env:
           USGS_API_KEY: ${{ secrets.USGS_API_KEY }}
           HCDP_API_KEY: ${{ secrets.HCDP_API_KEY }}
+          ENMAX_OUTAGE_CODE: ${{ secrets.ENMAX_OUTAGE_CODE }}
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
