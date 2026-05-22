@@ -66,12 +66,14 @@ class InfoCalgaryScraper(BaseScraper):
 <p><em>Calgary ARES: <a href="https://www.calgaryares.ca">calgaryares.ca</a> | RAC: <a href="https://www.rac.ca">rac.ca</a></em></p>
 
 <h3>Winlink Gateway</h3>
-<p>RMS stations within range of Calgary (HF & VHF):</p>
+<p>RMS stations within range of Calgary (HF, VHF & UHF):</p>
 <table class="info-table">
 <tr><th>Call</th><th>Freq</th><th>Mode</th><th>Grid</th></tr>
 <tr><td>VE6KTL-10</td><td>145.010</td><td>Packet</td><td>DO21</td></tr>
 <tr><td>VE6WMA-10</td><td>145.030</td><td>Packet</td><td>DO21</td></tr>
 <tr><td>VE6HRR-5</td><td>7083.5</td><td>VARA HF</td><td>DO20</td></tr>
+<tr><td>VE6FAR</td><td>UHF</td><td>VARA / Packet</td><td></td></tr>
+<tr><td>VE6SRC</td><td>HF / VHF</td><td>VARA / Packet</td><td></td></tr>
 </table>
 </details>
 </div>"""
