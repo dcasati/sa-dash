@@ -8,6 +8,7 @@ from src.scrape.calgary_river_levels import scrape as calgary_river_levels_scrap
 from src.scrape.calgary_transit import scrape as calgary_transit_scrape
 from src.scrape.calgary_traffic import scrape as calgary_traffic_scrape
 from src.scrape.enmax_power import scrape as enmax_power_scrape
+from src.scrape.calgary_emergency import scrape as calgary_emergency_scrape
 from src.scrape.calgary_news import scrape as calgary_news_scrape
 from src.scrape.global_events_wire import scrape as global_events_wire_scrape
 
@@ -20,6 +21,7 @@ _REGISTRY: dict[str, callable] = {
     "calgary_transit": calgary_transit_scrape,
     "calgary_traffic": calgary_traffic_scrape,
     "enmax_power": enmax_power_scrape,
+    "calgary_emergency": calgary_emergency_scrape,
     "calgary_news": calgary_news_scrape,
     "global_events_wire": global_events_wire_scrape,
 }

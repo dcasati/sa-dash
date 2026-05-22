@@ -12,6 +12,7 @@ LOCATIONS = {
             "calgary_transit",
             "calgary_traffic",
             "enmax_power",
+            "calgary_emergency",
             "calgary_news",
             "global_events_wire",
         ],
