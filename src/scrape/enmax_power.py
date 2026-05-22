@@ -63,12 +63,15 @@ class EnmaxPowerScraper(BaseScraper):
         except Exception as e:
             import sys
             print(f"[enmax_power] API error: {e}", file=sys.stderr)
-            # Fallback: link to the outage portal
+            # API is IP-restricted; show helpful fallback with direct link
             html = (
-                f'<p>⚠️ Power outage data unavailable ({type(e).__name__}). '
-                '<a href="https://outages.enmax.com">View ENMAX Outage Portal →</a></p>'
+                '<p>⚡ Check ENMAX for current outages in your area:</p>'
+                '<ul>'
+                '<li><a href="https://outages.enmax.com">🗺️ ENMAX Outage Map</a> — live map & list view</li>'
+                '<li><a href="tel:+14035142100">📞 403-514-2100</a> — report or check outages</li>'
+                '</ul>'
             )
-            text = "Power outage data unavailable — see outages.enmax.com"
+            text = "Check outages.enmax.com or call 403-514-2100"
             return self.result(html=html, text=text)
 
 
