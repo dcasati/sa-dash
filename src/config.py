@@ -14,6 +14,8 @@ LOCATIONS = {
             "enmax_power",
             "calgary_emergency",
             "calgary_news",
+            "cbc_canada",
+            "cbc_world",
             "global_events_wire",
         ],
     }

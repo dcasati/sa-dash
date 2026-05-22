@@ -10,6 +10,8 @@ from src.scrape.calgary_traffic import scrape as calgary_traffic_scrape
 from src.scrape.enmax_power import scrape as enmax_power_scrape
 from src.scrape.calgary_emergency import scrape as calgary_emergency_scrape
 from src.scrape.calgary_news import scrape as calgary_news_scrape
+from src.scrape.cbc_canada import scrape as cbc_canada_scrape
+from src.scrape.cbc_world import scrape as cbc_world_scrape
 from src.scrape.global_events_wire import scrape as global_events_wire_scrape
 
 _REGISTRY: dict[str, callable] = {
@@ -23,6 +25,8 @@ _REGISTRY: dict[str, callable] = {
     "enmax_power": enmax_power_scrape,
     "calgary_emergency": calgary_emergency_scrape,
     "calgary_news": calgary_news_scrape,
+    "cbc_canada": cbc_canada_scrape,
+    "cbc_world": cbc_world_scrape,
     "global_events_wire": global_events_wire_scrape,
 }
 
