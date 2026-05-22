@@ -28,13 +28,26 @@ def _format_published(entry) -> str:
         return raw
 
 
+def _strip_html(text: str) -> str:
+    """Strip HTML tags and return plain text."""
+    from bs4 import BeautifulSoup
+    if "<" in text:
+        soup = BeautifulSoup(text, "html.parser")
+        # Remove img tags entirely
+        for img in soup.find_all("img"):
+            img.decompose()
+        return soup.get_text(separator=" ").strip()
+    return text
+
+
 def parse_rss(xml_text: str, limit: int = 5) -> list[dict]:
     feed = feedparser.parse(xml_text)
     items = []
     for entry in feed.entries:
         title = clean_text(getattr(entry, "title", "")) or "Untitled"
         link = getattr(entry, "link", "") or ""
-        summary = clean_text(getattr(entry, "summary", "") or getattr(entry, "description", ""))
+        raw_summary = getattr(entry, "summary", "") or getattr(entry, "description", "")
+        summary = clean_text(_strip_html(raw_summary))
         published = _format_published(entry)
         items.append(
             {
