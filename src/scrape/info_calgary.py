@@ -72,8 +72,11 @@ class InfoCalgaryScraper(BaseScraper):
 <tr><td>VE6KTL-10</td><td>145.010</td><td>Packet</td><td>DO21</td></tr>
 <tr><td>VE6WMA-10</td><td>145.030</td><td>Packet</td><td>DO21</td></tr>
 <tr><td>VE6HRR-5</td><td>7083.5</td><td>VARA HF</td><td>DO20</td></tr>
-<tr><td>VE6FAR</td><td>UHF</td><td>VARA / Packet</td><td></td></tr>
-<tr><td>VE6SRC</td><td>HF / VHF</td><td>VARA / Packet</td><td></td></tr>
+<tr><td>VE6FAR</td><td>431 MHz</td><td>VARA / Packet</td><td></td></tr>
+<tr><td>VE6SRC</td><td>3539.5 kHz (80m)</td><td>VARA HF</td><td></td></tr>
+<tr><td>VE6SRC</td><td>7139.5 kHz (40m)</td><td>VARA HF</td><td></td></tr>
+<tr><td>VE6SRC</td><td>10122.5 kHz (30m)</td><td>VARA HF</td><td></td></tr>
+<tr><td>VE6SRC</td><td>14185.5 kHz (20m)</td><td>VARA HF</td><td></td></tr>
 </table>
 </details>
 </div>"""
